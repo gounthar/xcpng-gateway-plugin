@@ -1,0 +1,33 @@
+<!--
+  Gateway connector descriptor.
+
+  id, name and version are NOT declared here. The IntelliJ Platform Gradle plugin patches
+  them in from the `pluginConfiguration` block in build.gradle.kts, and declaring them in
+  both places is how the two copies drift. The toolbox sibling hit exactly that with its two
+  name fields: one was changed, the build stayed green, and the UI still showed the old one.
+
+  The <extensions> block is deliberately absent rather than stubbed. Adding an extension that
+  names a class which does not exist yet makes verifyPlugin fail with a resolution error,
+  which is a worse first-run experience than a plugin that loads and does nothing. Write the
+  connector class first, then declare it. See CONTEXT.md for the order.
+-->
+<idea-plugin>
+    <vendor url="https://github.com/gounthar/xcpng-gateway-plugin">gounthar</vendor>
+
+    <description><![CDATA[
+      Open a JetBrains IDE against a virtual machine on an XCP-ng pool, through Xen Orchestra.
+
+      Unofficial and unaffiliated with Vates. This is a personal experiment.
+    ]]></description>
+
+    <!--
+      UNVERIFIED, and the first thing to check on the first build.
+
+      com.jetbrains.gateway is the module both Red Hat's devspaces-gateway-plugin and Gitpod's
+      connector depend on, which is where this name comes from. It has not been confirmed
+      against the pinned Gateway artifact here, and a wrong module id fails at load time with
+      a message about an unresolved dependency rather than at build time.
+    -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.jetbrains.gateway</depends>
+</idea-plugin>

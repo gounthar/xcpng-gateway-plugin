@@ -1,0 +1,72 @@
+[versions]
+# The IntelliJ Platform Gradle plugin, 2.x line.
+#
+# MEASURED 2026-08-29 from the Gradle Plugin Portal metadata:
+#   curl -s https://plugins.gradle.org/m2/org/jetbrains/intellij/platform/\
+#     org.jetbrains.intellij.platform.gradle.plugin/maven-metadata.xml | grep release
+#   -> <release>2.18.1</release>, lastUpdated 20260710143656
+#
+# Unlike the three pins in the toolbox sibling, this one has no runtime ceiling. It is build
+# tooling, it never reaches the plugin zip, and keeping it current is the right default.
+# dependabot is left free to raise it.
+intellij-platform = "2.18.1"
+
+# JetBrains Gateway, the product this plugin is built against.
+#
+# THE TRAP, measured 2026-08-29 and the reason this block is long.
+#
+# Gateway is published ONLY to the snapshots repository. The releases repository answers 404
+# for com/jetbrains/gateway/JetBrainsGateway/maven-metadata.xml, while snapshots answers 200
+# with 49 versions, lastUpdated 20260829073813. So there is no such thing as a released
+# Gateway artifact to depend on, and a build configured the ordinary way (only
+# `intellijPlatform { defaultRepositories() }`) cannot resolve this coordinate at all. The
+# failure is a plain "could not find" naming a version that visibly exists on the website,
+# which reads as a typo and is not one.
+#
+# Consequence: build.gradle.kts must add the snapshots repository explicitly, and every
+# version here carries a -SNAPSHOT suffix of one of three shapes:
+#   NNN-NIGHTLY-CUSTOM-SNAPSHOT        rolling, never pin this
+#   NNN.BBBB-EAP-CANDIDATE-SNAPSHOT    a release candidate
+#   NNN.BBBB.PP-CUSTOM-SNAPSHOT        a specific build, and the one to pin
+#
+# 262 is the 2026.2 line. 262.10315.53 is the newest 262 build published as of the
+# measurement above.
+#
+# NOT YET VERIFIED BY A BUILD. Nothing here has run `./gradlew build` against this
+# coordinate. The version string is read out of the published metadata, which establishes
+# that it exists and nothing more. Treat the first successful build as the evidence, and
+# correct this comment when it happens.
+gateway = "262.10315.53-CUSTOM-SNAPSHOT"
+
+# Kotlin.
+#
+# UNLIKE THE TOOLBOX SIBLING, this is bounded above by the IntelliJ Platform rather than by
+# Toolbox's bin/lib, and the binding is stricter: the platform documents a supported Kotlin
+# version per release branch, and compiling above it produces metadata the IDE cannot read.
+# The rule of thumb the platform publishes is to stay on the Kotlin version bundled with the
+# target IDE, which for the 2026.2 line is the 2.2 series.
+#
+# NOT MEASURED HERE. The toolbox sibling establishes its equivalent pin by reading the
+# installed app's bin/lib and then launching against it. No such check has been run for this
+# project, so this value is a starting point chosen from the platform's own guidance, not a
+# measurement. Do the bin/lib read before trusting it.
+kotlin = "2.2.20"
+
+# Both are platform-provided, exactly as they are Toolbox-provided in the sibling. They are
+# declared compileOnly in build.gradle.kts and must never reach the plugin zip.
+#
+# NOT MEASURED. The toolbox sibling's values come from reading jars in the installed app.
+# The equivalent read for the IntelliJ Platform has not been done. Until it has, these are
+# the newest releases rather than a runtime floor, which is the wrong basis and is recorded
+# as such rather than quietly presented as a pin.
+coroutines = "1.10.2"
+serialization = "1.9.0"
+
+[libraries]
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+
+[plugins]
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "intellij-platform" }
