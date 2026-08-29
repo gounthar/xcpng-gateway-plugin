@@ -12,15 +12,13 @@ repositories {
     mavenCentral()
 
     intellijPlatform {
+        // defaultRepositories() only. An earlier version of this block called snapshots() as
+        // well, on the strength of a real measurement of the wrong index. See the long note in
+        // gradle/libs.versions.toml: the plugin downloads the IDE from the JetBrains CDN via
+        // the product release feed, not from intellij-repository, so what is or is not present
+        // in that maven repository does not decide anything here. Gateway is an ordinary
+        // release. Do not add snapshots() back without a failure that it fixes.
         defaultRepositories()
-
-        // REQUIRED, and not optional tidiness. Gateway is published only to the snapshots
-        // repository: the releases repository answers 404 for
-        // com/jetbrains/gateway/JetBrainsGateway/maven-metadata.xml while snapshots answers
-        // 200 with 49 versions. Measured 2026-08-29. Without this line the dependency below
-        // cannot resolve, and the error names a version that visibly exists on JetBrains'
-        // website, which reads as a typo and is not one.
-        snapshots()
     }
 }
 
@@ -90,7 +88,9 @@ tasks.test {
  * value on purpose, so a developer with a global hooks directory still gets this project's
  * hooks, and it says so when it overrides one. `-PskipGitHooks` opts out.
  */
-val installGitHooks by tasks.registering {
+// tasks.register, not `by tasks.registering`. The delegated form is deprecated as of
+// Gradle 9.6 ("Use the named() API instead") and warns on every build.
+val installGitHooks = tasks.register("installGitHooks") {
     description = "Points core.hooksPath at .githooks for this repository."
     group = "verification"
 
