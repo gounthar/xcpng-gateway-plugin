@@ -1,3 +1,5 @@
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+
 plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.serialization)
@@ -72,8 +74,24 @@ intellijPlatform {
         }
     }
 
-    // Not wired to a token here. Publishing is a deliberate act, and a token in a build file
-    // is a token in a repository. See SECURITY.md.
+    // THE CHECK THAT TESTS THE ONE CLAIM A GREEN BUILD CANNOT.
+    //
+    // <depends>com.jetbrains.gateway</depends> is resolved at LOAD time, so compiling
+    // successfully says nothing about whether that module id exists. The verifier loads the
+    // artifact against a real Gateway and reports a missing dependency as a problem, which is
+    // the only way to settle it short of launching the app.
+    //
+    // create(), not ide(). The DSL method is `create`; `ide` does not exist and fails as an
+    // unresolved reference. Read from IntelliJPlatformExtension$PluginVerification$Ides, which
+    // also offers recommended(), latest {}, select {}, current() and local(...).
+    pluginVerification {
+        ides {
+            create(IntelliJPlatformType.Gateway, libs.versions.gateway.get())
+        }
+    }
+
+    // Publishing is not wired to a token here. It is a deliberate act, and a token in a build
+    // file is a token in a repository. See SECURITY.md.
 }
 
 tasks.test {
