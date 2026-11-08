@@ -9,7 +9,7 @@
 # Unlike the three pins in the toolbox sibling, this one has no runtime ceiling. It is build
 # tooling, it never reaches the plugin zip, and keeping it current is the right default.
 # dependabot is left free to raise it.
-intellij-platform = "2.19.0"
+intellij-platform = "2.20.0"
 
 # JetBrains Gateway, the product this plugin is built against.
 #
